@@ -74,6 +74,7 @@ double lidar_time_offset = 0.0;
 float res_last[100000] = {0.0};
 float DET_RANGE = 300.0f;
 const float MOV_THRESHOLD = 1.5f;
+int count_ = 0;
 
 mutex mtx_buffer;
 condition_variable sig_buffer;
@@ -1071,6 +1072,31 @@ int main(int argc, char** argv)
 //            /*** add the feature points to map kdtree ***/
 //            map_incremental();
 //
+
+            {
+                std::ofstream outFile;
+                outFile.open(std::string("/home/inkers/satyajit/catkin_pv_lio/hba_out/") + "pose.json", std::ios::app | std::ios::out);
+                // Eigen::Matrix4d outT;
+                // outT << state_point.rot.toRotationMatrix(), state_point.pos, 0, 0, 0,
+                    // Measures.lidar_beg_time;
+                // outFile << fixed;
+                // tx ty tz qw qx qy qz.
+                // for (int j = 0; j < 4; j++) {
+                //     for (int k = 0; k < 4; k++)
+                //         outFile << outT(j, k) << ",";
+                //     outFile << endl;
+                // }
+                outFile << state_point.pos.x() << " " << state_point.pos.y() << " " << state_point.pos.z() << " " << state_point.rot.w() << " " << state_point.rot.x() << " " << state_point.rot.y() << " " << state_point.rot.z() << std::endl;
+                std::string filename = std::string("/home/inkers/satyajit/catkin_pv_lio/hba_out/") + "pcd/" + to_string(count_) + ".pcd";
+                // pcl::PointCloud<pcl::PointXYZI>::Ptr pcl_body(new pcl::PointCloud<pcl::PointXYZI>());
+                // transformLidar(Eye3d, Zero3d, feats_undistort, pcl_body);
+                // pcl_body = &feats_undistort;
+                pcl::io::savePCDFileBinary(filename, *feats_undistort);
+                outFile.close();
+
+                count_++;
+            }
+
             /******* Publish points *******/
             if (path_en)                         publish_path(pubPath);
             if (scan_pub_en)      publish_frame_world(pubLaserCloudFull);
